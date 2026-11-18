@@ -1,0 +1,11 @@
+# test-only installed LLVM19 + Java 21; not LLVM24 production qualification
+# actual JNI ORC compilation, array copies and native cleanup included per call
+M3_LLVM_BENCH_META,major=19,vm=21.0.12.1,arch=amd64
+operation,batch_size,samples,warmups,java_median_ms,orc_median_ms,orc_to_java_ratio
+ADD,1024,20,8,0.005,3.109,670.9
+SUBTRACT,1024,20,8,0.002,3.189,1627.7
+MULTIPLY,1024,20,8,0.002,2.921,1236.3
+ADD,65536,20,8,0.083,3.487,42.1
+SUBTRACT,65536,20,8,0.091,3.749,41.3
+MULTIPLY,65536,20,8,0.077,3.715,48.1
+M3_LLVM_BENCH_FINISHED checksum=0
