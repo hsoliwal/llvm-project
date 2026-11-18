@@ -1,0 +1,26 @@
+{
+  "status": "DRAFT/HOLD — actual LLVM 24 and M3JDK21 acceptance not established",
+  "llvm_source_base": "80317e4f7c57b0c293a943a1a57799f5291b5a80",
+  "java_api": "org.m3jdk.compiler.llvm.LlvmOrcJit",
+  "source_before_blob": "089f769918cf84b3b1243602f3582219f16e273d",
+  "source_after_blob": "248639223261c7991cb529f205237adbd2590b76",
+  "new_contract": "Latch failed System.load/nativeInitialize within JVM; refuse mixed JNI ABI retries",
+  "original_java_api_signatures": "UNCHANGED",
+  "new_lifecycle_policy": "Fail closed after attempted native loading fails",
+  "local_evidence": {
+    "java21_javac_release21_xlint_all_werror": "PASS",
+    "test_c11_cc_wall_wextra_werror": "PASS",
+    "java21_xcheck_jni_wrong_major": "PASS",
+    "wrong_major_stub": 19,
+    "production_java_major": 24,
+    "invalid_file_preload_not_poisoned": "PASS",
+    "wrong_major_refusal": "PASS",
+    "retry_same_and_alternate_path_refusal": "PASS",
+    "JNI_evaluate_after_rejection_refusal": "PASS"
+  },
+  "real_llvm24_native": "PENDING",
+  "real_jni_orc": "PENDING",
+  "canonical_synexia_openrewrite": "NOT_RUN",
+  "m3jdk21_compiler_reception": "NOT_AUTHORIZED",
+  "license": "Apache-2.0 WITH LLVM-exception"
+}
