@@ -135,20 +135,24 @@ Java_org_m3jdk_compiler_llvm_LlvmOrcJit_nativeEvaluate(
 
 #if LLVM_VERSION_MAJOR >= 24
     /* LLVM 24 transfers ownership of the existing LLVM context. */
+    /* LLVM's C++ owner constructs std::unique_ptr<LLVMContext> immediately.
+       Do not dispose this context again, even if ORC returns an error. */
     thread_context = LLVMOrcCreateNewThreadSafeContextFromLLVMContext(context);
+    context = NULL;
+    owns_context = 0;
     if (!thread_context) {
         m3_throw(env, "java/lang/OutOfMemoryError", "ORC thread-safe context allocation failed");
         goto cleanup;
     }
-    context = NULL;
-    owns_context = 0;
 #endif
+    /* LLVM's C++ owner immediately wraps M in a unique_ptr<Module>.
+       Clear our handle at transfer, not only when construction succeeds. */
     thread_module = LLVMOrcCreateNewThreadSafeModule(module, thread_context);
+    module = NULL;
     if (!thread_module) {
         m3_throw(env, "java/lang/OutOfMemoryError", "ORC module allocation failed");
         goto cleanup;
     }
-    module = NULL;
     LLVMOrcDisposeThreadSafeContext(thread_context); /* TSM retains its shared context. */
     thread_context = NULL;
 
