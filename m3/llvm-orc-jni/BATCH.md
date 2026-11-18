@@ -73,3 +73,17 @@ plugin goals or existing JNI entrypoints.
 Performance intent is fewer *compilations* per N-element batch, but
 there is **no measured performance claim** until native LLVM24 benchmarks
 against equivalent Java and scalar ORC paths are executed.
+
+
+## Bounded JVM garbage-collection stress
+
+The additional `LlvmOrcBatchStressTestMain` runs 100 real native-batch calls
+across four workers while an independent Java GC thread requests collection.
+It uses a 96 MB Java heap, `-Xcheck:jni`, a range of zero- to 4,096-element
+arrays, and verifies every output against normal Java wraparound arithmetic.
+The JNI implementation uses `GetLongArrayRegion` and copied C heap lanes,
+so it does not retain Java-heap array pointers while ORC compiles. The
+test uses the *actual LLVM19 runtime* in the local host qualification and
+passed, but JVM GC safety under LLVM24 and full M3JDK21 are still separate
+unpassed gates. The new test is included in the existing LLVM24
+`verify.sh` step without replacing any earlier tests.
