@@ -64,6 +64,9 @@
     "native_llvm24_CI": "NOT_RUN",
     "performance_measurement": "NOT_RUN — no speedup claim",
     "m3jdk21_receiving": "NOT_RUN/HOLD",
-    "canonical_openrewrite_java_and_c": "NOT_RUN/HOLD"
+    "canonical_openrewrite_java_and_c": "NOT_RUN/HOLD",
+    "local_jni_gc_stress": "PASS: actual LLVM19 ORC, 100 compiled batches / four workers with concurrent System.gc(), Java 21 -Xmx96m -Xcheck:jni -XX:+UseSerialGC",
+    "local_jni_gc_stress_test": "src/test/java/org/m3jdk/compiler/llvm/LlvmOrcBatchStressTestMain.java",
+    "native_llvm24_gc_stress": "NOT_RUN / REQUIRED IN LLVM24 CI"
   }
 }
