@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           bash m3/llvm-orc-jni/scripts/verify-upstream.sh
           python3 m3/llvm-orc-jni/scripts/verify-ownership.py
+          python3 m3/llvm-orc-jni/scripts/verify-builder.py
           grep -Fq 'set(LLVM_VERSION_MAJOR 24)' cmake/Modules/LLVMVersion.cmake
           bash m3/llvm-orc-jni/scripts/verify-source.sh
       - name: Check required original libc CMake source closure before configuring LLVM 24
