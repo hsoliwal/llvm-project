@@ -19,7 +19,7 @@ option(M3_LLVM_ENABLE_FAULT_TEST "Build Linux-only ORC transfer fault interposer
 if(M3_LLVM_ENABLE_FAULT_TEST AND TARGET LLVM)
   set(M3_LLVM_LIBS LLVM)
 endif()
-add_library(m3llvmorcjni SHARED src/main/c/m3_llvm_orc_jni.c)
+add_library(m3llvmorcjni SHARED src/main/c/m3_llvm_orc_jni.c src/main/c/m3_llvm_orc_batch_jni.c)
 target_include_directories(m3llvmorcjni PRIVATE ${JNI_INCLUDE_DIRS} ${LLVM_INCLUDE_DIRS})
 target_link_libraries(m3llvmorcjni PRIVATE ${M3_LLVM_LIBS})
 target_compile_features(m3llvmorcjni PRIVATE c_std_11)

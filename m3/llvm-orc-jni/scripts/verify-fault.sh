@@ -28,3 +28,17 @@ cat "$output"
 grep -Fq 'M3_LLVM_TEST_CONSUMED_MODULE_AND_RETURNED_NULL' "$output"
 grep -Fq 'M3_LLVM_ORC_OWNERSHIP_INJECTION_PASS' "$output"
 echo 'M3_LLVM_ORC_TRANSFER_FAULT_BOTH_ASSERTIONS_PASS'
+# Repeat the same original-owner consuming-module fault in a fresh JVM
+# through the new array-backed JNI lane; neither interposer nor executable
+# address is delivered as a production dependency.
+LD_PRELOAD="$M3_LLVM_TRANSFER_FAULT_LIBRARY" \
+  "$JAVA_HOME/bin/java" -Xcheck:jni -cp build/classes \
+  org.m3jdk.compiler.llvm.LlvmOrcBatchFaultTestMain "$M3_LLVM_LIBRARY" >"$output" 2>&1 || {
+    cat "$output" >&2
+    echo 'M3_LLVM_BATCH_OWNERSHIP_FAULT_TEST_FAILED' >&2
+    exit 1
+  }
+cat "$output"
+grep -Fq 'M3_LLVM_TEST_CONSUMED_MODULE_AND_RETURNED_NULL' "$output"
+grep -Fq 'M3_LLVM_ORC_BATCH_CONSUMED_MODULE_FAULT_PASS' "$output"
+echo 'M3_LLVM_ORC_BATCH_TRANSFER_FAULT_PASS'
