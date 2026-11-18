@@ -4,7 +4,7 @@ name: M3 LLVM24 CPU ORC JNI contract
 
 on:
   push:
-    branches: [main, "m3/llvm24-orc-jni-20261118", "m3/llvm24-orc-transfer-ownership-20261118"]
+    branches: [main, "m3/llvm24-orc-jni-20261118", "m3/llvm24-orc-transfer-ownership-20261118", "m3/llvm24-failed-native-load-latch-20261118"]
     paths:
       - "m3/llvm-orc-jni/**"
       - ".github/workflows/m3-llvm24-orc-jni.yml"
@@ -39,6 +39,7 @@ jobs:
           set -euo pipefail
           bash m3/llvm-orc-jni/scripts/verify-source.sh
           bash m3/llvm-orc-jni/scripts/verify-java.sh
+          bash m3/llvm-orc-jni/scripts/verify-wrong-major.sh
 
   linux-llvm24-native:
     needs: java21-contract
