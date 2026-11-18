@@ -34,6 +34,11 @@ inside LLVM.
   incompatible libraries fail closed. The LLVM ORC C ABI is experimental,
   so both native and Java versions are source-pinned.
 
+The source-pin script `scripts/verify-upstream.sh` requires the exact
+original LLVM baseline to be an ancestor and checks each reviewed LLVM C API
+Git blob at both the pinned baseline and receiving commit. It refuses
+changed headers or an unrelated fork history before native compilation.
+
 This first acceptance slice deliberately creates one JIT per operation. It
 is a correctness/interop probe, **not a claimed fast path**. Reuse of ORC
 execution sessions, caching, vector/MLIR lowering, GPU backends and persistent
