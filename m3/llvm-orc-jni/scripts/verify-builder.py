@@ -38,7 +38,7 @@ def verify(text: str) -> None:
 verify(source)
 for invalid in (
     source.replace("LLVMCreateBuilderForModule(module)", "LLVMCreateBuilderInContext(context)"),
-    source.replace("#if LLVM_VERSION_MAJOR >= 24", "#if LLVM_VERSION_MAJOR >= 25"),
+    source.replace(expected, expected.replace("#if LLVM_VERSION_MAJOR >= 24", "#if LLVM_VERSION_MAJOR >= 25")),
     source.replace("LLVMPositionBuilderAtEnd(builder, block);", "LLVMPositionBuilderAtEnd(NULL, block);"),
 ):
     try:
