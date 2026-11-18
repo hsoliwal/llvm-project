@@ -49,6 +49,7 @@ jobs:
         with:
           persist-credentials: false
           filter: blob:none
+          fetch-depth: 20
           sparse-checkout: |
             llvm
             cmake
@@ -62,6 +63,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          bash m3/llvm-orc-jni/scripts/verify-upstream.sh
           grep -Fq 'set(LLVM_VERSION_MAJOR 24)' cmake/Modules/LLVMVersion.cmake
           bash m3/llvm-orc-jni/scripts/verify-source.sh
       - name: Compile original LLVM 24 Core, ORC and host target
