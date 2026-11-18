@@ -53,6 +53,7 @@ jobs:
           sparse-checkout: |
             llvm
             cmake
+            libc
             third-party
             m3/llvm-orc-jni
       - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
@@ -67,6 +68,15 @@ jobs:
           python3 m3/llvm-orc-jni/scripts/verify-ownership.py
           grep -Fq 'set(LLVM_VERSION_MAJOR 24)' cmake/Modules/LLVMVersion.cmake
           bash m3/llvm-orc-jni/scripts/verify-source.sh
+      - name: Check required original libc CMake source closure before configuring LLVM 24
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d libc || { echo "::error::LLVM24 FindLibcCommonUtils requires the sibling libc/ directory"; exit 1; }
+          test -f cmake/Modules/FindLibcCommonUtils.cmake || {
+            echo "::error::Original LLVM24 libc CMake module missing"
+            exit 1
+          }
       - name: Compile original LLVM 24 Core, ORC and host target
         shell: bash
         run: |
