@@ -4,7 +4,7 @@ name: M3 LLVM24 CPU ORC JNI contract
 
 on:
   push:
-    branches: [main, "m3/llvm24-orc-jni-20261118", "m3/llvm24-orc-transfer-ownership-20261118"]
+    branches: [main, "m3/llvm24-orc-jni-20261118", "m3/llvm24-orc-transfer-ownership-20261118", "m3/llvm24-c-api-fast-preflight-20261118"]
     paths:
       - "m3/llvm-orc-jni/**"
       - ".github/workflows/m3-llvm24-orc-jni.yml"
@@ -78,7 +78,7 @@ jobs:
             echo "::error::Original LLVM24 libc CMake module missing"
             exit 1
           }
-      - name: Compile original LLVM 24 Core, ORC and host target
+      - name: Configure original LLVM 24 Core, ORC and host target
         shell: bash
         run: |
           set -euo pipefail
@@ -90,6 +90,27 @@ jobs:
             -DLLVM_INCLUDE_BENCHMARKS=OFF \
             -DLLVM_BUILD_LLVM_DYLIB=ON \
             -DLLVM_LINK_LLVM_DYLIB=ON
+      - name: Check JNI C11 against generated LLVM24 headers before the full native build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f build/llvm/include/llvm/Config/llvm-config.h
+          test -f llvm/include/llvm-c/Core.h
+          test -f m3/llvm-orc-jni/src/main/c/m3_llvm_orc_jni.c
+          C_COMPILER="$(sed -n 's/^CMAKE_C_COMPILER:FILEPATH=//p' build/llvm/CMakeCache.txt | head -n 1)"
+          test -x "$C_COMPILER"
+          "$C_COMPILER" -std=c11 -Wall -Wextra -Werror -Werror=deprecated-declarations \
+            -fsyntax-only \
+            -I "$PWD/build/llvm/include" \
+            -I "$PWD/llvm/include" \
+            -I "$JAVA_HOME/include" \
+            -I "$JAVA_HOME/include/linux" \
+            m3/llvm-orc-jni/src/main/c/m3_llvm_orc_jni.c
+          echo "M3_LLVM24_JNI_ORIGINAL_C_HEADER_ABI_PREFLIGHT_PASS"
+      - name: Compile original LLVM 24 Core, ORC and host target
+        shell: bash
+        run: |
+          set -euo pipefail
           cmake --build build/llvm --target LLVM -j 2
       - name: Build additive JNI source with LLVM 24 original libraries
         shell: bash
