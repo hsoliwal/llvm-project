@@ -49,7 +49,7 @@ jobs:
         with:
           persist-credentials: false
           filter: blob:none
-          fetch-depth: 2
+          fetch-depth: 20
           sparse-checkout: |
             llvm
             cmake
