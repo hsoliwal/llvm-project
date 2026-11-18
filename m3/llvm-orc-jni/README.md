@@ -109,3 +109,25 @@ Apache/LLVM exception, JNI symbol ABI, original SDK ownership and the exact
 LLVM24 native binary provenance. New source candidates require Synexia's
 canonical recipe-first source custody and independently passing JDK tests.
 See `SOURCE_PINS.tsv` and `QUALIFICATION.json`.
+
+## LLVM 24 sparse checkout / original libc CMake prerequisite
+
+The actual [LLVM 24 Linux native workflow run 44241274009](https://github.com/hsoliwal/llvm-project/actions/runs/44241274009)
+completed the Java 21 contract job successfully but **failed before the native
+compiler ran**. Original `llvm/CMakeLists.txt` at line 721 includes
+`cmake/Modules/FindLibcCommonUtils.cmake`, which expects the original sibling
+`libc/` source tree. The earlier GitHub sparse checkout contained `llvm/`,
+`cmake/`, `third-party/`, and this M3 source folder, but omitted `libc/`.
+
+The native CI checkout now includes the original `libc/` directory, with a
+fail-closed existence check before CMake configuration. The original
+`FindLibcCommonUtils.cmake` Git blob is pinned in `SOURCE_PINS.tsv`; no
+upstream CMake, original libc, compiler or LLVM C API code is modified.
+
+A bounded host CMake regression reproduced the exact missing-directory
+condition: without `libc/`, the original module produced no
+`llvm-libc-common-utilities` target, and its caller rejected configuration;
+with `libc/`, configuration succeeded. This proves the source-tree
+prerequisite, **not** a successful build of LLVM 24. A complete source-built
+LLVM 24 ORC/JNI/ownership-failure test must still pass on the repaired
+workflow before M3JDK21 receiving or performance claims.
