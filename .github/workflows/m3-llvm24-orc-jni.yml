@@ -4,7 +4,7 @@ name: M3 LLVM24 CPU ORC JNI contract
 
 on:
   push:
-    branches: ["m3/llvm24-orc-jni-20261118"]
+    branches: [main, "m3/llvm24-orc-jni-20261118", "m3/llvm24-orc-transfer-ownership-20261118"]
     paths:
       - "m3/llvm-orc-jni/**"
       - ".github/workflows/m3-llvm24-orc-jni.yml"
@@ -64,6 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           bash m3/llvm-orc-jni/scripts/verify-upstream.sh
+          python3 m3/llvm-orc-jni/scripts/verify-ownership.py
           grep -Fq 'set(LLVM_VERSION_MAJOR 24)' cmake/Modules/LLVMVersion.cmake
           bash m3/llvm-orc-jni/scripts/verify-source.sh
       - name: Compile original LLVM 24 Core, ORC and host target
@@ -86,6 +87,7 @@ jobs:
           cmake -S m3/llvm-orc-jni -B build/m3-llvm-orc-jni -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DM3_LLVM_REQUIRED_MAJOR=24 \
+            -DM3_LLVM_ENABLE_FAULT_TEST=ON \
             -DLLVM_DIR="$PWD/build/llvm/lib/cmake/llvm"
           cmake --build build/m3-llvm-orc-jni -j 2
       - name: Execute real LLVM24 ORC and JNI with Java21 overflow/concurrency
@@ -95,6 +97,15 @@ jobs:
           export M3_LLVM_LIBRARY="$PWD/build/m3-llvm-orc-jni/libm3llvmorcjni.so"
           test -f "$M3_LLVM_LIBRARY"
           bash m3/llvm-orc-jni/scripts/verify.sh
+      - name: Prove transferred module ownership with original LLVM24 failure injection
+        shell: bash
+        run: |
+          set -euo pipefail
+          export M3_LLVM_LIBRARY="$PWD/build/m3-llvm-orc-jni/libm3llvmorcjni.so"
+          export M3_LLVM_TRANSFER_FAULT_LIBRARY="$PWD/build/m3-llvm-orc-jni/libm3llvmtransferfault.so"
+          test -f "$M3_LLVM_LIBRARY"
+          test -f "$M3_LLVM_TRANSFER_FAULT_LIBRARY"
+          bash m3/llvm-orc-jni/scripts/verify-fault.sh
       - name: Retain bounded original LLVM/JNI qualification logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
