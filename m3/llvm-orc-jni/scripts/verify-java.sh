@@ -10,5 +10,6 @@ mkdir -p build/classes build/jni-headers
   -h build/jni-headers -d build/classes \
   src/main/java/org/m3jdk/compiler/llvm/LlvmOrcJit.java \
   src/test/java/org/m3jdk/compiler/llvm/LlvmOrcJitNoLoadTestMain.java \
-  src/test/java/org/m3jdk/compiler/llvm/LlvmOrcJitTestMain.java
+  src/test/java/org/m3jdk/compiler/llvm/LlvmOrcJitTestMain.java \
+  src/test/java/org/m3jdk/compiler/llvm/LlvmOrcFaultTransferTestMain.java
 "$JAVA_HOME/bin/java" -cp build/classes org.m3jdk.compiler.llvm.LlvmOrcJitNoLoadTestMain
