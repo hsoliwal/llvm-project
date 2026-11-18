@@ -1,5 +1,5 @@
 {
-  "state": "DRAFT/HOLD — full LLVM24 and M3JDK21 gates not executed",
+  "state": "DRAFT/HOLD \u2014 full LLVM24 and M3JDK21 gates not executed",
   "source_repository": "hsoliwal/llvm-project",
   "source_commit": "591f3d1edf0a9ee718d17a0ee70dd013b3c01908",
   "llvm_target_major": 24,
@@ -19,5 +19,14 @@
   "jni_gc_stress": "NOT_RUN",
   "llvm_benchmark": "NOT_RUN",
   "source_abi_plugin_equivalence": "NOT_RUN",
-  "public_merge": "HOLD"
+  "public_merge": "HOLD",
+  "llvm24_orc_context_module_ownership": "FIX_CANDIDATE \u2014 source owner matches std::unique_ptr transfer, 24 execution NOT_RUN",
+  "llvm19_orc_module_transfer_fault_injection": "PASS \u2014 Linux LD_PRELOAD consumed real LLVM19 module and returned null; JNI raised expected OutOfMemoryError without double-free",
+  "llvm19_orc_normal_post_fix": "PASS \u2014 Java 21 test-only LLVM19 major expectation; actual LLVM19 ORC arithmetic and two-thread execution",
+  "llvm24_real_fault_injection": "NOT_RUN \u2014 required hosted native source-built LLVM24 and Java21",
+  "llvm_orc_cpp_upstream_owner_blob": "387a5353957027d52e91e7e2814afca6206f5582",
+  "fault_test_build_enabled_default": false,
+  "jni_abi_changed": false,
+  "java_abi_changed": false,
+  "full_m3jdk21_receiver": "HOLD"
 }
