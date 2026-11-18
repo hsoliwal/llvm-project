@@ -23,6 +23,8 @@ public final class LlvmOrcJit {
     public static final int LLVM_MAJOR = 24;
 
     private static volatile Path loadedPath;
+    /** A native library already loaded in this JVM cannot be reliably unloaded. */
+    private static volatile boolean rejectedNativeLoad;
 
     private LlvmOrcJit() {}
 
@@ -36,6 +38,9 @@ public final class LlvmOrcJit {
      * @param library absolute or relative path to the trusted native library
      */
     public static synchronized void load(Path library) {
+        if (rejectedNativeLoad) {
+            throw new IllegalStateException("a previous LLVM JNI load failed; restart the JVM");
+        }
         Path path = Objects.requireNonNull(library, "library").toAbsolutePath().normalize();
         if (loadedPath != null) {
             if (!loadedPath.equals(path)) {
@@ -46,12 +51,22 @@ public final class LlvmOrcJit {
         if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
             throw new IllegalArgumentException("native library is missing or not a regular file: " + path);
         }
-        System.load(path.toString());
-        int major = nativeInitialize();
-        if (major != LLVM_MAJOR) {
-            throw new UnsatisfiedLinkError("LLVM JNI major mismatch: expected " + LLVM_MAJOR + ", found " + major);
+        // System.load may register native symbols even when initialization later
+        // rejects the library. Do not load a different JNI ABI in this JVM.
+        boolean admitted = false;
+        try {
+            System.load(path.toString());
+            int major = nativeInitialize();
+            if (major != LLVM_MAJOR) {
+                throw new UnsatisfiedLinkError("LLVM JNI major mismatch: expected " + LLVM_MAJOR + ", found " + major);
+            }
+            loadedPath = path;
+            admitted = true;
+        } finally {
+            if (!admitted) {
+                rejectedNativeLoad = true;
+            }
         }
-        loadedPath = path;
     }
 
     /** Whether the native library has been admitted by {@link #load(Path)}. */
