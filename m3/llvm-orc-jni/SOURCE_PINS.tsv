@@ -9,4 +9,5 @@ llvm/include/llvm-c/Error.h	1a07c1b64d8199b25b2661527338c6f101dab835
 cmake/Modules/FindLibcCommonUtils.cmake	8f3a2738c60039de8f4708e73da465eb196ecf2e
 cmake/Modules/LLVMVersion.cmake	ca16353d25c9bb9532c58e865c32a8ae3d3bb730
 llvm/lib/ExecutionEngine/Orc/OrcV2CBindings.cpp	387a5353957027d52e91e7e2814afca6206f5582
+llvm/lib/IR/Core.cpp	d57f447862fdbbb1cc02ff201d631389046124e7
 # exact upstream commit: 591f3d1edf0a9ee718d17a0ee70dd013b3c01908

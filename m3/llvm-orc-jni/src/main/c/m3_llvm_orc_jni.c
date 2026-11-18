@@ -107,7 +107,13 @@ Java_org_m3jdk_compiler_llvm_LlvmOrcJit_nativeEvaluate(
     LLVMTypeRef signature = LLVMFunctionType(i64, args, 2, 0);
     LLVMValueRef function = LLVMAddFunction(module, "m3_cpu_op", signature);
     LLVMBasicBlockRef block = LLVMAppendBasicBlockInContext(context, function, "entry");
+#if LLVM_VERSION_MAJOR >= 24
+    /* LLVM 24 binds IRBuilder to its owning module and deprecates the
+       delayed context-bound builder. Retain the older API for LLVM 19 smoke. */
+    builder = LLVMCreateBuilderForModule(module);
+#else
     builder = LLVMCreateBuilderInContext(context);
+#endif
     LLVMPositionBuilderAtEnd(builder, block);
     LLVMValueRef a = LLVMGetParam(function, 0);
     LLVMValueRef b = LLVMGetParam(function, 1);
