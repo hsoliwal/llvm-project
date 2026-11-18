@@ -10,3 +10,6 @@ cd "$SCRIPT_DIR/.."
 
 "$SCRIPT_DIR/verify-java.sh"
 "$JAVA_HOME/bin/java" -Xcheck:jni -cp build/classes org.m3jdk.compiler.llvm.LlvmOrcJitTestMain "$M3_LLVM_LIBRARY"
+"$JAVA_HOME/bin/java" -Xcheck:jni -cp build/classes org.m3jdk.compiler.llvm.LlvmOrcBatchTestMain "$M3_LLVM_LIBRARY"
+"$JAVA_HOME/bin/java" -Xcheck:jni -Xms32m -Xmx96m -XX:+UseSerialGC -cp build/classes \
+  org.m3jdk.compiler.llvm.LlvmOrcBatchStressTestMain "$M3_LLVM_LIBRARY"
