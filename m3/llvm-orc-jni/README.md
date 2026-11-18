@@ -131,3 +131,28 @@ with `libc/`, configuration succeeded. This proves the source-tree
 prerequisite, **not** a successful build of LLVM 24. A complete source-built
 LLVM 24 ORC/JNI/ownership-failure test must still pass on the repaired
 workflow before M3JDK21 receiving or performance claims.
+
+## LLVM 24 original module-owned IRBuilder API
+
+[LLVM 24 hosted run 44254788447](https://github.com/hsoliwal/llvm-project/actions/runs/44254788447)
+passed the Java 21 contract, source ancestry, libc CMake prerequisite, and the
+**complete original LLVM 24 library build**, then failed while compiling the
+M3 JNI bridge under strict `-Werror=deprecated-declarations` at the call to
+`LLVMCreateBuilderInContext`.
+
+The unchanged original `llvm/include/llvm-c/Core.h` explicitly deprecates
+the context builder in favor of `LLVMCreateBuilderForModule`, implemented
+by the unchanged original `llvm/lib/IR/Core.cpp`. This source now selects
+the module-owned API under `#if LLVM_VERSION_MAJOR >= 24` while retaining
+the original context-owned entrypoint for host LLVM 19 testing. The instruction
+builder remains positioned in the same basic block, constructs the same
+add/subtract/multiply IR, and preserves Java long overflow behavior. The C
+API declaration, compiled JNI symbol names and Java 21 API are unchanged;
+no warning is disabled.
+
+`scripts/verify-builder.py` checks the original pinned header and C++ owner,
+the exact version gate, and negative source mutations **before** the native
+build. The original Git source pins and the full SHA-256 receipt are preserved.
+LLVM 24 JNI linking, real ORC JIT, and consuming-module fault tests must all
+pass on the follow-up workflow; this source correction alone cannot authorize
+M3JDK21 promotion.
