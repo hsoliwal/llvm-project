@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+# Copyright 2026 Hitesh Soliwal and Contributors to the Synexia Project
+name: M3 LLVM24 CPU ORC JNI contract
+
+on:
+  push:
+    branches: ["m3/llvm24-orc-jni-20261118"]
+    paths:
+      - "m3/llvm-orc-jni/**"
+      - ".github/workflows/m3-llvm24-orc-jni.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "m3/llvm-orc-jni/**"
+      - ".github/workflows/m3-llvm24-orc-jni.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  java21-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          filter: blob:none
+          sparse-checkout: |
+            m3/llvm-orc-jni
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify source receipts, JDK21 API and no-native fail-closed behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash m3/llvm-orc-jni/scripts/verify-source.sh
+          bash m3/llvm-orc-jni/scripts/verify-java.sh
+
+  linux-llvm24-native:
+    needs: java21-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          filter: blob:none
+          sparse-checkout: |
+            llvm
+            cmake
+            third-party
+            m3/llvm-orc-jni
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Confirm LLVM 24 source baseline, avoid unqualified runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'set(LLVM_VERSION_MAJOR 24)' cmake/Modules/LLVMVersion.cmake
+          bash m3/llvm-orc-jni/scripts/verify-source.sh
+      - name: Compile original LLVM 24 Core, ORC and host target
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S llvm -B build/llvm -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_TARGETS_TO_BUILD=X86 \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_BUILD_LLVM_DYLIB=ON \
+            -DLLVM_LINK_LLVM_DYLIB=ON
+          cmake --build build/llvm --target LLVM -j 2
+      - name: Build additive JNI source with LLVM 24 original libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S m3/llvm-orc-jni -B build/m3-llvm-orc-jni -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DM3_LLVM_REQUIRED_MAJOR=24 \
+            -DLLVM_DIR="$PWD/build/llvm/lib/cmake/llvm"
+          cmake --build build/m3-llvm-orc-jni -j 2
+      - name: Execute real LLVM24 ORC and JNI with Java21 overflow/concurrency
+        shell: bash
+        run: |
+          set -euo pipefail
+          export M3_LLVM_LIBRARY="$PWD/build/m3-llvm-orc-jni/libm3llvmorcjni.so"
+          test -f "$M3_LLVM_LIBRARY"
+          bash m3/llvm-orc-jni/scripts/verify.sh
+      - name: Retain bounded original LLVM/JNI qualification logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: m3-llvm24-orc-jni-build-evidence
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            build/llvm/CMakeCache.txt
+            build/m3-llvm-orc-jni/CMakeCache.txt
+            m3/llvm-orc-jni/build/jni-headers/*

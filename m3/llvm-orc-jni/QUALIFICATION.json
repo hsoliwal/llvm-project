@@ -1,0 +1,23 @@
+{
+  "state": "DRAFT/HOLD — full LLVM24 and M3JDK21 gates not executed",
+  "source_repository": "hsoliwal/llvm-project",
+  "source_commit": "591f3d1edf0a9ee718d17a0ee70dd013b3c01908",
+  "llvm_target_major": 24,
+  "llvm_major_host_smoke": 19,
+  "original_llvm_license": "Apache-2.0 WITH LLVM-exception",
+  "api_owner": "LLVM-C and LLVM ORC LLJIT",
+  "java_owner": "jdk.m3.compiler (future separate receipt only)",
+  "java21_compilation": "PASS: javac --release 21 -Xlint:all -Werror",
+  "java21_no_native_refusal": "PASS: missing-library and symlink refusal",
+  "llvm19_native_host_smoke": "PASS: actual LLVM19 ORC LLJIT JNI (temporary test-only Java expectation 19)",
+  "production_java_rejects_llvm19": "PASS: UnsatisfiedLinkError, expected 24, found 19",
+  "llvm24_original_header_build": "NOT_RUN",
+  "llvm24_native_orc_jit": "NOT_RUN",
+  "linux_github_actions": "NOT_RUN",
+  "windows_macos": "NOT_RUN",
+  "m3jdk21_native_module_reception": "NOT_RUN",
+  "jni_gc_stress": "NOT_RUN",
+  "llvm_benchmark": "NOT_RUN",
+  "source_abi_plugin_equivalence": "NOT_RUN",
+  "public_merge": "HOLD"
+}
