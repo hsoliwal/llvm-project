@@ -19,7 +19,7 @@
   "jni_gc_stress": "NOT_RUN",
   "llvm_benchmark": "NOT_RUN",
   "source_abi_plugin_equivalence": "NOT_RUN",
-  "public_merge": "HOLD pending actual source-built LLVM24 and canonical Synexia/M3JDK21 qualification",
+  "public_merge": "HOLD pending original source-built LLVM24 and canonical Synexia/M3JDK21 qualification; no automatic ORC fast path authorized",
   "llvm24_orc_context_module_ownership": "FIX_CANDIDATE — source owner matches std::unique_ptr transfer, 24 execution NOT_RUN",
   "llvm19_orc_module_transfer_fault_injection": "PASS — Linux LD_PRELOAD consumed real LLVM19 module and returned null; JNI raised expected OutOfMemoryError without double-free",
   "llvm19_orc_normal_post_fix": "PASS — Java 21 test-only LLVM19 major expectation; actual LLVM19 ORC arithmetic and two-thread execution",
@@ -62,11 +62,47 @@
     "local_loader": "TEST-ONLY LLVM19 native target initializer; not part of submitted LLVM24 runtime",
     "source_llvm_major": 24,
     "native_llvm24_CI": "NOT_RUN",
-    "performance_measurement": "NOT_RUN — no speedup claim",
+    "performance_measurement": "PASS: measured real LLVM19 JIT; NOT_RUN LLVM24; local JNI slower than Java for this workload",
     "m3jdk21_receiving": "NOT_RUN/HOLD",
     "canonical_openrewrite_java_and_c": "NOT_RUN/HOLD",
     "local_jni_gc_stress": "PASS: actual LLVM19 ORC, 100 compiled batches / four workers with concurrent System.gc(), Java 21 -Xmx96m -Xcheck:jni -XX:+UseSerialGC",
     "local_jni_gc_stress_test": "src/test/java/org/m3jdk/compiler/llvm/LlvmOrcBatchStressTestMain.java",
     "native_llvm24_gc_stress": "NOT_RUN / REQUIRED IN LLVM24 CI"
+  },
+  "llvm_orc_cost_probe_20261118": {
+    "status": "REAL LLVM19 MEASURED / LLVM24 PENDING — diagnostic only",
+    "source": "src/test/java/org/m3jdk/compiler/llvm/LlvmOrcBatchCostBenchmarkMain.java",
+    "script": "scripts/benchmark-orc.sh",
+    "local_environment": "OpenJDK21.0.12.1; installed LLVM19, explicit test-only major-19 loader, x86_64",
+    "calls": "Real compiled LLVM ORC, one new JIT per batch, real JNI two-input array transfer and cleanup",
+    "design": "20 end-to-end latency samples per operation/size; 8 native warmups, separate HotSpot warmup, alternating order, exact result parity",
+    "sample_sizes": [
+      1024,
+      65536
+    ],
+    "results_ms_65536": {
+      "ADD": {
+        "java": 0.083,
+        "orc": 3.487,
+        "ratio": 42.1
+      },
+      "SUBTRACT": {
+        "java": 0.091,
+        "orc": 3.749,
+        "ratio": 41.3
+      },
+      "MULTIPLY": {
+        "java": 0.077,
+        "orc": 3.715,
+        "ratio": 48.1
+      }
+    },
+    "observed_cost": "LLVM19 ORC per-batch compilation and native cleanup is 41-48x slower than Java for 65536-element primitive arithmetic on this host",
+    "policy": "Never auto-dispatch cheap primitive array arithmetic to LLVM ORC on this evidence; retain Java HotSpot default, ORC remains explicit test-only proof",
+    "performance_production_llvm24": "NOT_RUN",
+    "actual_jmh_or_equivalent_replicated": "NOT_RUN",
+    "llvm24_ci": "MUST execute after native/ownership gates, no speed-threshold suppression",
+    "source_license": "Apache-2.0 WITH LLVM-exception",
+    "caveat": "Exploratory end-to-end microbenchmark; not a controlled cross-platform production performance claim"
   }
 }
